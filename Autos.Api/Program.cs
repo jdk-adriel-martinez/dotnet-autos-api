@@ -6,7 +6,7 @@ namespace Autos.Api;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -17,6 +17,14 @@ public class Program
         builder.Services.AddDbContext<AutosDbContext>(options => options.UseNpgsql(connectionString));
 
         var app = builder.Build();
+
+        await using (var scope = app.Services.CreateAsyncScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<AutosDbContext>();
+            // Apply schema changes and bootstrap reference data on startup.
+            await dbContext.Database.MigrateAsync();
+            await SeedData.InitializeAsync(dbContext);
+        }
 
         if (app.Environment.IsDevelopment())
         {
