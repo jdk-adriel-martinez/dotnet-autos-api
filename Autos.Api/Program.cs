@@ -21,6 +21,7 @@ public class Program
         await using (var scope = app.Services.CreateAsyncScope())
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<AutosDbContext>();
+            // Apply schema changes and bootstrap reference data on startup.
             await dbContext.Database.MigrateAsync();
             await SeedData.InitializeAsync(dbContext);
         }

@@ -18,6 +18,7 @@ public static class SeedData
             .Select(x => x.Nombre)
             .ToHashSetAsync(cancellationToken);
 
+        // Seed only the missing brands so repeated startups stay idempotent.
         var marcasFaltantes = DefaultMarcasAutos
             .Where(x => !marcasExistentes.Contains(x.Nombre))
             .ToArray();
